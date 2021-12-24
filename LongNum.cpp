@@ -1,5 +1,15 @@
 #include "LongNum.h"
 
+void LongNum::reset(int ndeg)
+{
+	delete[] num;
+	num = new uint32_t[ndeg + 1];
+	for (int i = 0; i <= ndeg; i++)
+	{
+		num[i] = 0;
+	}
+}
+
 LongNum LongNum::operator-() const
 {
 	LongNum tmp(*this);
@@ -9,10 +19,7 @@ LongNum LongNum::operator-() const
 
 LongNum LongNum::operator+(const LongNum& ln) const
 {
-	LongNum b;
-	if (sign == ln.sign)
-		b.sign = sign;
-	else
+	if (sign != ln.sign)
 	{
 		if (sign)
 			return (*this - -ln);
@@ -20,10 +27,10 @@ LongNum LongNum::operator+(const LongNum& ln) const
 			return (ln - -*this);
 	}
 	long maxI = max(degree, ln.degree), minI = min(degree, ln.degree);
-	//delete b.num;
-	b.num = new uint32_t[maxI + 2];
-	b.num[maxI + 1] = 0;
-	uint64_t ans = 0, ost = 0, x = 0, y = 0;
+	LongNum b(maxI + 1);
+	if (sign == ln.sign)
+		b.sign = sign;
+	uint64_t ans = 0, x = 0, y = 0;
 
 	for (int i = 0; i <= minI; ++i)
 	{
@@ -52,6 +59,11 @@ LongNum LongNum::operator+(const LongNum& ln) const
 	else
 		b.degree = maxI;
 
+	while (b.num[b.degree] == 0 and b.degree > 0)
+	{
+		b.degree--;
+	}
+
 	return b;
 }
 
@@ -68,9 +80,7 @@ LongNum LongNum::operator-(const LongNum& ln) const
 
 	if (*this == ln)
 	{
-		LongNum resn;
-		resn.num = new uint32_t;
-		*resn.num = 0;
+		LongNum resn(0);
 		return resn; // case n - n == 0
 	}
 	if (sign and *this < ln) // case 4 - 5 -> -(5 - 4)
@@ -86,11 +96,7 @@ LongNum LongNum::operator-(const LongNum& ln) const
 	//case n > n2
 
 	int maxI = max(degree, ln.degree), minI = min(degree, ln.degree);
-	LongNum b;
-	//delete b.num;
-	b.num = new uint32_t[maxI + 1];
-	for (int i = 0; i <= maxI; i++)
-		b.num[i] = 0;
+	LongNum b(maxI);
 	b.degree = maxI;
 	uint64_t ost = 0, a = 0, c = 0;
 	for (int i = 0; i <= minI; i++)
@@ -142,41 +148,33 @@ LongNum LongNum::operator-(const LongNum& ln) const
 
 LongNum LongNum::operator*(const LongNum& ln) const
 {
-	LongNum b;
-	//delete b.num;
-	b.num = new uint32_t[degree + 1 + ln.degree + 1 + 1];
+	if (ln == LongNum(0) or *this == LongNum(0))
+		return LongNum(0);
+	LongNum b(degree + 1 + ln.degree + 1);
 	b.degree = degree + ln.degree + 1;
-	for (int i = 0; i <= b.degree; i++)
-	{
-		b.num[i] = 0;
-	}
 	for (int j = 0; j <= ln.degree; j++)
 	{
 		LongNum v(*this * ln.num[j]);
 		v = v << j;
 		b = b + v;
 	}
-	if (b.num[b.degree] == 0)
-		b.degree--;
 	if (sign == ln.sign)
 		b.sign = true;
 	else
 		b.sign = false;
+	while (b.num[b.degree] == 0 and b.degree > 0)
+	{
+		b.degree--;
+	}
 	return b;
 }
 
 LongNum LongNum::operator*(const uint32_t n2) const
 {
-	LongNum b;
 	if (n2 == 0) {
-		b.num = new uint32_t;
-		*b.num = 0;
-		return b;
+		return LongNum(0);
 	}
-	//delete b.num;
-	b.num = new uint32_t[degree + 2];
-	for (int i = 0; i <= degree + 1; i++)
-		b.num[i] = 0;
+	LongNum b(degree + 1);
 
 	uint64_t ans = 0, ost = 0, bf = 0;
 	for (int i = 0; i <= degree; i++)
@@ -202,20 +200,159 @@ LongNum LongNum::operator*(const uint32_t n2) const
 	return b;
 }
 
+LongNum LongNum::operator%(long deg)
+{
+	LongNum b(deg / MAX);
+	for (int i = 0; i <= deg / MAX; i++)
+	{
+		b.num[i] = num[i] % deg;
+	}
+	b.degree = deg / MAX;
+	return b;
+}
+
+LongNum LongNum::operator%(const LongNum& ln) const
+{
+	LongNum res = *this - (*this / ln) * ln;
+	if (res.sign == false)
+		return res + ln;
+	return res;
+}
+
 LongNum LongNum::operator<<(int n) const
 {
-	LongNum b;
-	//delete[] b.num;
-	b.num = new uint32_t[degree + n + 1];
+	LongNum b(degree + n);
 	b.sign = sign;
 	b.degree = degree + n;
-	for (int i = 0; i < n; i++)
-		b.num[i] = 0;
 	for (int i = n; i <= n + degree; i++)
 	{
 		b.num[i] = num[i - n];
 	}
 	return b;
+}
+
+LongNum LongNum::operator>>(int n) const
+{
+	LongNum b(degree - n);
+	b.sign = sign;
+	b.degree = degree - n;
+	if (b.degree <= 0) {
+		b = LongNum(0);
+		b.degree = 0;
+	}
+	for (int i = 0; i <= degree - n; i++)
+	{
+		b.num[i] = num[i + n];
+	}
+	return b;
+}
+
+LongNum LongNum::operator++(int)
+{
+	if (!sign)
+		return -(--*this); // case ++(-4) -> -(--4);
+	LongNum res(*this);
+	uint64_t ans = 0, x = 1, y = 0;
+	for (int i = 0; i <= degree; ++i)
+	{
+		x += num[i];
+		ans += x;
+		num[i] = ans % MAX;
+		ans /= MAX;
+		if (ans == 0)
+			break;
+		x = 0;
+	}
+	if (ans)
+	{
+		LongNum ntmp(degree + 1);
+		for (int i = 0; i <= degree; i++)
+		{
+			ntmp.num[i] = num[i];
+		}
+		ntmp.num[degree + 1] = ans % MAX;
+		delete[] num;
+		num = ntmp.num;
+		degree++;
+		ntmp.num = nullptr;
+		res = *this;
+	}
+	return res;
+}
+
+LongNum& LongNum::operator++()
+{
+	if (!sign)
+	{
+		*this = -(-- * this); // case ++(-4) -> -(--4);
+		return *this;
+	}
+
+
+	uint64_t ans = 0, x = 1, y = 0;
+	for (int i = 0; i <= degree; ++i)
+	{
+		x += num[i];
+		ans += x;
+		num[i] = ans % MAX;
+		ans /= MAX;
+		if (ans == 0)
+			break;
+		x = 0;
+	}
+	if (ans)
+	{
+		LongNum ntmp(degree + 1);
+		for (int i = 0; i <= degree; i++)
+		{
+			ntmp.num[i] = num[i];
+		}
+		ntmp.num[degree + 1] = ans % MAX;
+		delete[] num;
+		num = ntmp.num;
+		degree++;
+		ntmp.num = nullptr;
+	}
+	return *this;
+}
+
+LongNum LongNum::operator--(int)
+{
+	if (!sign)
+		return -((*this)++); // case (-4)-- -> -(4++);
+
+	LongNum tmp(0), ans(*this);
+	*tmp.num = 1;
+	
+	*this = *this - tmp;
+
+	return ans;
+}
+
+LongNum& LongNum::operator--()
+{
+	if (!sign)
+	{
+		*this = -(++(*this)); // case --(-4) -> -(++4);
+		return *this;
+	}
+
+	LongNum tmp(0);
+	*tmp.num = 1;
+
+	*this = *this - tmp;
+
+	return *this;
+}
+
+bool LongNum::isOdd() const
+{
+	return(num[0] & 1) == 1;
+}
+
+bool LongNum::isEven() const
+{
+	return((num[0] & 1) == 0);
 }
 
 bool LongNum::operator<(const LongNum& ln) const
@@ -296,6 +433,35 @@ bool LongNum::operator>=(const LongNum& ln) const
 LongNum::LongNum()
 {
 	//*num = 0;
+}
+
+LongNum::LongNum(int deg)
+{
+	if (deg < 0)
+		return;
+	num = new uint32_t[deg + 1];
+	for (int i = 0; i <= deg; i++)
+	{
+		num[i] = 0;
+	}
+}
+
+LongNum::LongNum(long long n, bool b)
+{
+	long long nn = n;
+	int nl = 0;
+	while (nn)
+	{
+		nl++;
+		nn /= MAX;
+	}
+	num = new uint32_t[nl];
+	for (int i = 0; i < nl; i++)
+	{
+		num[i] = n % MAX;
+		n /= MAX;
+	}
+	degree = nl - 1;
 }
 
 LongNum::LongNum(const LongNum& ln)
@@ -439,21 +605,23 @@ LongNum::LongNum(std::string& line, int deg)
 
 		res = sum(res, buf);
 	}
+	if (res == "")
+		res = "0";
 
 	int pos = 0;
-	int isize = res.length() / 9;
-	if (res.length() % 9 != 0)
+	int isize = res.length() / 6;
+	if (res.length() % 6 != 0)
 		isize++;
 
 	num = new uint32_t[isize];
 	for (int i = 0; i < isize - 1; i++)
 	{
-		string tmps = res.substr(i * 9, 9);
+		string tmps = res.substr(i * 6, 6);
 		reverse(tmps.begin(), tmps.end());
 		num[i] = atoi(tmps.c_str());
 	}
 
-	string tmps = res.substr(9* (isize - 1));
+	string tmps = res.substr(6* (isize - 1));
 	reverse(tmps.begin(), tmps.end());
 	num[isize - 1] = atoi(tmps.c_str());
 	degree = isize - 1;
@@ -500,7 +668,13 @@ LongNum& LongNum::operator=(const LongNum& ln)
 
 LongNum::~LongNum()
 {
-	delete[] num;
+	if (num)
+	{		
+		if (degree > 0)
+			delete[] num;
+		else
+			delete num;
+	}
 }
 
 ostream& operator<<(ostream& out, const LongNum& bin)
@@ -520,7 +694,7 @@ ostream& operator<<(ostream& out, const LongNum& bin)
 		}
 
 		uint32_t tmp = bin.num[i];
-		int len = 9;
+		int len = 6;
 		while (tmp > 0)
 		{
 			len--;
