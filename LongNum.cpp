@@ -437,6 +437,13 @@ bool LongNum::operator>=(const LongNum& ln) const
 	return !(*this < ln);
 }
 
+LongNum LongNum::abs() const
+{
+	LongNum tmp = *this;
+	tmp.sign = true;
+	return tmp;
+}
+
 LongNum::LongNum()
 {
 	//*num = 0;

@@ -225,7 +225,7 @@ LongNum LongNum::operator/(const LongNum& ln) const
     int iter_count = 0;
     if (this->degree - ln.degree > 1)
         iter_count = std::ceil(log2(degree - ln.degree));
-    iter_count += 2;
+    iter_count += 4;
 
 
     unsigned long long _tmp = MAX * MAX * MAX;
@@ -298,7 +298,7 @@ LongNum LongNum::FastModDegree(const LongNum& p,const LongNum& n) const
     LongNum ans(*this);
     ans = ans % n;
 
-    if ((p % LongNum(2, true)) == LongNum(0)) {
+    if (p.isEven()) {
         LongNum res = (ans * ans).FastModDegree(p / LongNum(2, true), n) % n;
         return res;
     }

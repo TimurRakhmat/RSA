@@ -58,6 +58,8 @@ public:
 	bool operator<=(const LongNum&)const;
 	bool operator>=(const LongNum&)const;
 
+	LongNum abs()const;
+
 	LongNum mulKaratsuba(const LongNum&)const;
 	LongNum mulFourier(const LongNum&)const;
 	LongNum FastDegree(long)const;
@@ -65,7 +67,7 @@ public:
 	LongNum FastModDegree(const LongNum& p, const LongNum& n)const;
 
 	int Legendre(const LongNum&) const;
-	int Jacobi(const LongNum&) const;
+	int Jacobi(const LongNum&) const; // bad Jacobi, remove
 	int Jacobi2(const LongNum&) const;
 	int Fermat(const LongNum&) const;
 

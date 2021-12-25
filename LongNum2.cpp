@@ -107,8 +107,6 @@ int Solovay_Strassen(const LongNum& ln)
 
 	if (gcd(a, ln) > LongNum(1, true))
 		return 0;
-	cout << a.FastModDegree((ln - LongNum(1, true)) / LongNum(2, true), ln) << endl;
-	cout << ln.Jacobi2(a) << endl;
 	if (a.FastModDegree((ln - LongNum(1, true)) / LongNum(2, true), ln) != LongNum(ln.Jacobi2(a), true))
 		return 0;
 	return 1;
