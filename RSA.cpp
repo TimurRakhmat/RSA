@@ -116,14 +116,11 @@ void RSA::generate_keys(int len, int type, double ex)
 		delete e;
 	} while (1);
 
-	cout << gcd(*e, *fn) << endl;
-
 	auto keys = fullgcd(*e, *fn);
 	d = new LongNum(keys.first.first);
-	cout << (*d).mulFourier(*e) << endl;
-	cout << *fn << endl;
-	cout << (*d).mulFourier(*e) % *fn << endl;
-	cout << (keys.first.second.mulFourier(*e) % *fn) << endl;
+
+	//cout << *fn << endl;
+	//cout << (*d).mulFourier(*e) % *fn << endl;  bad division
 	
 	
 }

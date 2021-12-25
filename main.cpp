@@ -57,7 +57,7 @@ int main()
 
 	srand(static_cast<unsigned int>(time(NULL)));
 	RSA rsa;
-	rsa.generate_keys(60, RSA::SOLOVAY, 0.9);
+	rsa.generate_keys(100, RSA::SOLOVAY, 0.9);
 
 	string tx = "115359189341";
 	LongNum n1(tx, 10);
