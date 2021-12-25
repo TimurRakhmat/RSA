@@ -61,10 +61,13 @@ public:
 	LongNum mulKaratsuba(const LongNum&)const;
 	LongNum mulFourier(const LongNum&)const;
 	LongNum FastDegree(long)const;
-	LongNum FastModDegree(long, long)const;
+	LongNum FastDegree(const LongNum&)const;
+	LongNum FastModDegree(const LongNum& p, const LongNum& n)const;
 
-	int Legendre() const;
-	int Jacobi() const;
+	int Legendre(const LongNum&) const;
+	int Jacobi(const LongNum&) const;
+	int Jacobi2(const LongNum&) const;
+	int Fermat(const LongNum&) const;
 
 	LongNum();
 	LongNum(int);
@@ -79,5 +82,8 @@ public:
 	friend LongNum gcd(const LongNum&, const LongNum&);
 	friend pair<pair<LongNum, LongNum>, LongNum> fullgcd(const LongNum&, const LongNum&);
 	friend LongNum bingcd(const LongNum&, const LongNum&);
+
+	friend int Solovay_Strassen(const LongNum&);
+	friend int Miller_Rabin(const LongNum&);
 };
 
