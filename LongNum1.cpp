@@ -270,25 +270,40 @@ LongNum LongNum::FastDegree(long p) const
         return ans;
     }
     if (p % 2 == 0) {
-        return (*this * *this).FastDegree(p / 2);
+        return (*this * *this).FastDegree(p >> 1);
     }
     return *this * (this->FastDegree(p - 1));
 };
 
-LongNum LongNum::FastModDegree(long p, long n) const
+LongNum LongNum::FastDegree(const LongNum& p) const
 {
-    if (p == 0) {
+    if (p == LongNum(0)) {
         LongNum ans(0);
         *ans.num = 1;
         return ans;
     }
+    if (p.isEven()) {
+        return (*this * *this).FastDegree(p / LongNum(2, true));
+    }
+    return *this * (this->FastDegree(p - LongNum(1, true)));
+}
+
+LongNum LongNum::FastModDegree(const LongNum& p,const LongNum& n) const
+{
+
+    if (p == LongNum(0)) {
+        return LongNum(1, true);
+    }
 
     LongNum ans(*this);
     ans = ans % n;
-    if (p % 2 == 0) {
-        return (*this * *this).FastModDegree(p / 2, n) % n;
+
+    if ((p % LongNum(2, true)) == LongNum(0)) {
+        LongNum res = (ans * ans).FastModDegree(p / LongNum(2, true), n) % n;
+        return res;
     }
-    return (*this * (this->FastModDegree(p - 1, n))) % n;
+    LongNum res = (ans * (ans.FastModDegree(p - LongNum(1, true), n))) % n;
+    return res;
 }
 
 LongNum gcd(const LongNum& r, const LongNum& l)

@@ -203,9 +203,16 @@ LongNum LongNum::operator*(const uint32_t n2) const
 LongNum LongNum::operator%(long deg)
 {
 	LongNum b(deg / MAX);
+	unsigned long long ost = 0;
 	for (int i = 0; i <= deg / MAX; i++)
 	{
-		b.num[i] = num[i] % deg;
+		ost *= MAX;
+		ost += num[i];
+	}
+	for (int i = 0; i <= deg / MAX; i++)
+	{
+		b.num[i] = ost % deg;
+		ost /= deg;
 	}
 	b.degree = deg / MAX;
 	return b;
@@ -448,6 +455,12 @@ LongNum::LongNum(int deg)
 
 LongNum::LongNum(long long n, bool b)
 {
+	bool ssign = true;
+	if (n < 0)
+	{
+		n *= -1;
+		ssign = false;
+	}
 	long long nn = n;
 	int nl = 0;
 	while (nn)
@@ -462,6 +475,7 @@ LongNum::LongNum(long long n, bool b)
 		n /= MAX;
 	}
 	degree = nl - 1;
+	sign = ssign;
 }
 
 LongNum::LongNum(const LongNum& ln)

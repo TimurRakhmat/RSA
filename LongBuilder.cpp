@@ -21,7 +21,15 @@ void LongBuilder::generate(int deg)
 {
 	int p = deg / 20;
     if (!p)
+    {
         p = 1;
+        this->degree = p - 1;
+        if (num != nullptr)
+            delete[] num;
+        num = new uint32_t[p];
+        num[0] = rand() % (int)pow(10, deg);
+        return;
+    }
     this->degree = p - 1;
     if (num != nullptr)
         delete[] num;
